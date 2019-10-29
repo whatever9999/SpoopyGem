@@ -2,16 +2,75 @@
 
 public class Gravestone : MonoBehaviour
 {
-    public GameObject[] spawnables;
+    public Spawnable[] spawnables;
+    public Transform whereToSpawn;
+    public float intervalSinceDug;
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private SpriteRenderer SR;
+
+    private float currentIntervalSinceDug;
+    private bool dug = false;
+
+    private void Start()
     {
-        if(collision.gameObject.tag == "Player")
+        SR = GetComponent<SpriteRenderer>();
+    }
+    private void Update()
+    {
+        if(dug)
         {
-            int rand = (int)Random.Range(0, spawnables.Length);
+            currentIntervalSinceDug += Time.deltaTime;
 
-            Instantiate(spawnables[rand], transform.position, transform.rotation);
-            gameObject.SetActive(false);
+            if(currentIntervalSinceDug > intervalSinceDug)
+            {
+                dug = false;
+                SR.color = Color.yellow;
+                currentIntervalSinceDug = 0;
+            }
         }
     }
+
+    public void SpawnItem()
+    {
+        if (!dug)
+        {
+            dug = true;
+            SR.color = Color.black;
+
+            GameObject spawnItem = GetSpawnedItem();
+
+            if (spawnItem != null)
+            {
+                Instantiate(spawnItem, whereToSpawn.position, whereToSpawn.rotation);
+            }
+            else
+            {
+                //Something to indicate no spawn
+            }
+        }
+    }
+
+    private GameObject GetSpawnedItem()
+    {
+        double total = 0;
+        double amount = Random.Range(0, 100);
+
+        for (int i = 0; i < spawnables.Length; i++)
+        {
+            total += spawnables[i].percentageChance;
+
+            if (amount <= total)
+            {
+                return spawnables[i].prefab;
+            }
+        }
+        return null;
+    }
+}
+
+[System.Serializable]
+public class Spawnable
+{
+    public GameObject prefab;
+    public float percentageChance;
 }

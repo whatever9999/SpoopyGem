@@ -5,16 +5,18 @@ public class Zombie : MonoBehaviour
 {
     public float speed;
     public int timeAlive;
+    public float timeToChangeDirection;
 
     private Rigidbody2D RB;
 
-    private enum X
+    private bool justSpawned = true;
+    private float currentTimeSinceChangedDirection = 0;
+    private Vector2 currentSpeed;
+
+    private enum Direction
     {
         LEFT,
-        RIGHT
-    }
-    private enum Y
-    {
+        RIGHT,
         UP,
         DOWN
     }
@@ -23,51 +25,62 @@ public class Zombie : MonoBehaviour
     {
         RB = GetComponent<Rigidbody2D>();
 
-        RB.velocity = GetNewDirection();
+        currentSpeed = GetDirection();
+        justSpawned = false;
 
         StartCoroutine(Die());
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void Update()
     {
-        Vector2 newVelocity = RB.velocity;
+        currentTimeSinceChangedDirection += Time.deltaTime;
 
-        do
+        if (currentTimeSinceChangedDirection > timeToChangeDirection)
         {
-            newVelocity = GetNewDirection();
-        } while (newVelocity == RB.velocity);
+            currentSpeed = GetDirection();
+            currentTimeSinceChangedDirection = 0;
+        }
 
-        RB.velocity = newVelocity;
+        RB.velocity = currentSpeed;
     }
 
-    private Vector2 GetNewDirection()
+    private void OnCollisionStay2D(Collision2D collision)
     {
-        int x = Random.Range(0, 2);
-        int y = Random.Range(0, 2);
+        currentSpeed = GetDirection();
+    }
+
+    private Vector2 GetDirection()
+    {
+        int direction = Random.Range(0, 4);
 
         Vector2 newDirection = new Vector2(0, 0);
 
-        switch (x)
+        switch (direction)
         {
-            case (int)X.LEFT:
+            case (int)Direction.LEFT:
                 newDirection.x = -speed;
                 break;
-            case (int)X.RIGHT:
+            case (int)Direction.RIGHT:
                 newDirection.x = speed;
                 break;
-            default:
+            case (int)Direction.UP:
+                if(!justSpawned)
+                {
+                    newDirection.y = speed;
+                } else
+                {
+                    newDirection.x = -speed;
+                }
                 break;
-        }
-
-        switch (y)
-        {
-            case (int)Y.UP:
-                newDirection.y = speed;
-                break;
-            case (int)Y.DOWN:
-                newDirection.y = -speed;
-                break;
-            default:
+            case (int)Direction.DOWN:
+                if (!justSpawned)
+                {
+                    newDirection.y = -speed;
+                }
+                else
+                {
+                    newDirection.x = speed;
+                }
                 break;
         }
 

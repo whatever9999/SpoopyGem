@@ -7,7 +7,8 @@ public class UIManager : MonoBehaviour
     public static UIManager instance;
 
     public Text timer;
-    public PlayerScoreText[] playerScoreTexts;
+    public PlayerValueText[] playerScoreTexts;
+    public PlayerValueText[] playerInventoryTexts;
 
     public float startTimeSeconds;
 
@@ -44,18 +45,29 @@ public class UIManager : MonoBehaviour
 
     public void UpdateScore(int newScore, int playerNumber)
     {
-        foreach(PlayerScoreText p in playerScoreTexts)
+        foreach(PlayerValueText p in playerScoreTexts)
         {
             if(p.playerNumber == playerNumber)
             {
-                p.text.text = "P" + playerNumber + ": " + newScore;
+                p.text.text = "Score: " + newScore;
+            }
+        }
+    }
+
+    public void UpdateInventory(int newInventory, int playerNumber)
+    {
+        foreach (PlayerValueText p in playerInventoryTexts)
+        {
+            if (p.playerNumber == playerNumber)
+            {
+                p.text.text = "Inventory: " + newInventory;
             }
         }
     }
 }
 
 [System.Serializable]
-public class PlayerScoreText
+public class PlayerValueText
 {
     public int playerNumber;
     public Text text;
