@@ -10,6 +10,8 @@ public class PlayerState : MonoBehaviour
 
     private PlayerMovement PM;
     private UIManager UIM;
+    private GameManager GM;
+    private SFXManager SFXM;
 
     private int score = 0;
     private int inventory = 0;
@@ -20,6 +22,8 @@ public class PlayerState : MonoBehaviour
     {
         PM = GetComponent<PlayerMovement>();
         UIM = UIManager.instance;
+        GM = GameManager.instance;
+        SFXM = SFXManager.instance;
 
         transform.position = startPosition;
     }
@@ -47,6 +51,7 @@ public class PlayerState : MonoBehaviour
                 inventory += scoreFromTreasure;
                 UIM.UpdateInventory(inventory, playerNumber);
                 Destroy(collision.gameObject);
+                SFXM.PlayEffect(SoundEffectNames.PICKUPCOIN);
             } else
             {
                 //Show inventory is full (thought bubble of van and shake inventory text)
@@ -55,6 +60,7 @@ public class PlayerState : MonoBehaviour
         {
             //if(!isInvincible)
             {
+                SFXM.PlayEffect(SoundEffectNames.OOF);
                 inventory = 0;
                 UIM.UpdateInventory(inventory, playerNumber);
                 transform.position = startPosition;
@@ -67,10 +73,15 @@ public class PlayerState : MonoBehaviour
         {
             if (collision.gameObject.GetComponent<Van>().playerNumber == playerNumber)
             {
-                score += inventory;
-                UIM.UpdateScore(score, playerNumber);
-                inventory = 0;
-                UIM.UpdateInventory(inventory, playerNumber);
+                if(inventory != 0)
+                {
+                    score += inventory;
+                    UIM.UpdateScore(score, playerNumber);
+                    GM.UpdateScore(playerNumber, score);
+                    inventory = 0;
+                    UIM.UpdateInventory(inventory, playerNumber);
+                    SFXM.PlayEffect(SoundEffectNames.INVAN);
+                }
             } else
             {
                 //Shake their van to show they're at the wrong one

@@ -3,6 +3,7 @@
 public class PlayerDig : MonoBehaviour
 {
     private PlayerState PS;
+    private SFXManager SFXM;
 
     private Collider2D currentGravestone;
     private bool onGrave;
@@ -10,6 +11,7 @@ public class PlayerDig : MonoBehaviour
     private void Start()
     {
         PS = GetComponent<PlayerState>();
+        SFXM = SFXManager.instance;
     }
 
     private void OnTriggerStay2D(Collider2D collision)
@@ -36,6 +38,7 @@ public class PlayerDig : MonoBehaviour
             if (Input.GetButtonDown("P" + PS.playerNumber + "Interact"))
             {
                 currentGravestone.gameObject.GetComponent<Gravestone>().SpawnItem();
+                SFXM.PlayEffect(SoundEffectNames.DIG);
             }
         }
     }

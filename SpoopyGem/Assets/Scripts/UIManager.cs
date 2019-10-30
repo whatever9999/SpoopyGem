@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
+
+    private SFXManager SFXM;
 
     public Text timer;
     public PlayerValueText[] playerScoreTexts;
@@ -13,6 +15,7 @@ public class UIManager : MonoBehaviour
     public float startTimeSeconds;
 
     private float currentTimeSeconds;
+    private bool timerBeepStarted = false;
 
     private void Awake()
     {
@@ -27,6 +30,7 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        SFXM = SFXManager.instance;
         currentTimeSeconds = startTimeSeconds;
     }
 
@@ -37,9 +41,19 @@ public class UIManager : MonoBehaviour
         int seconds = (int)(currentTimeSeconds % 60);
         timer.text = string.Format("{0:00}:{1:00}", minutes, seconds);
 
+        if(!timerBeepStarted)
+        {
+            if (currentTimeSeconds <= 5)
+            {
+                StartCoroutine(TimerBeep());
+                timerBeepStarted = true;
+            }
+        }
+        
+
         if (currentTimeSeconds <= 0)
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            GameManager.instance.GoToEndScene();
         }
     }
 
@@ -63,6 +77,13 @@ public class UIManager : MonoBehaviour
                 p.text.text = "Inventory: " + newInventory;
             }
         }
+    }
+
+    IEnumerator TimerBeep()
+    {
+        SFXM.PlayEffect(SoundEffectNames.TIMERBEEP);
+        yield return new WaitForSeconds(1);
+        timerBeepStarted = false;
     }
 }
 
